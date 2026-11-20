@@ -7,23 +7,118 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Cairo', sans-serif; }
+    :root {
+      color-scheme: light;
+      --page: #f7f8fa;
+      --surface: #ffffff;
+      --surface-muted: #f1f3f5;
+      --ink: #111318;
+      --muted: #68707d;
+      --line: #e5e7eb;
+      --accent: #c8ff35;
+      --accent-ink: #141800;
+    }
+    html.dark {
+      color-scheme: dark;
+      --page: #0b0d10;
+      --surface: #15181d;
+      --surface-muted: #20242b;
+      --ink: #f5f7fa;
+      --muted: #a7afbc;
+      --line: #2b313a;
+      --accent: #c8ff35;
+      --accent-ink: #141800;
+    }
+    body { font-family: 'Cairo', sans-serif; background: var(--page); color: var(--ink); transition: background .3s ease, color .3s ease; }
+    .theme-surface { background: var(--surface); border-color: var(--line); }
+    .theme-muted { color: var(--muted); }
+    html.dark .bg-white, html.dark .bg-gray-50 { background-color: var(--surface) !important; }
+    html.dark .bg-gray-100 { background-color: var(--surface-muted) !important; }
+    html.dark .text-gray-900, html.dark .text-gray-800, html.dark .text-gray-700 { color: var(--ink) !important; }
+    html.dark .text-gray-600, html.dark .text-gray-500, html.dark .text-gray-400 { color: var(--muted) !important; }
+    html.dark .text-black { color: var(--ink) !important; }
+    html.dark .text-amber-600 { color: #d9ff4f !important; }
+    html.dark .text-red-500 { color: #ff8e9b !important; }
+    html.dark .text-emerald-700 { color: #73e6b2 !important; }
+    html.dark .text-black { color: var(--ink) !important; }
+    html.dark .text-amber-600 { color: #d9ff4f !important; }
+    html.dark .text-red-500 { color: #ff8e9b !important; }
+    html.dark .text-emerald-700 { color: #73e6b2 !important; }
+    html.dark .border, html.dark .border-gray-200, html.dark .border-gray-300 { border-color: var(--line) !important; }
+    html.dark select, html.dark input, html.dark textarea { background-color: var(--surface-muted); color: var(--ink); border-color: var(--line); }
+    html.dark .hover\:bg-gray-100:hover, html.dark .hover\:bg-gray-200:hover { background-color: #2b313a !important; }
+    html.dark .bg-amber-50 { background-color: #332b13 !important; }
+    html.dark .border-amber-200 { border-color: #66551a !important; }
+    html.dark .text-amber-900, html.dark .text-amber-700 { color: #f0df87 !important; }
+    html.dark .has-\[\:checked\]\:bg-gray-50:has(:checked) { background-color: #252b32 !important; }
+    body.dark-mode, body.dark-mode.bg-gray-50 { background-color: #0b0d10 !important; color: #f5f7fa !important; }
+    body.dark-mode .bg-white, body.dark-mode .bg-gray-50 { background-color: #15181d !important; }
+    body.dark-mode .bg-gray-100 { background-color: #20242b !important; }
+    body.dark-mode .product-card h3, body.dark-mode .text-black { color: #f5f7fa !important; }
+    body.dark-mode .text-gray-500, body.dark-mode .text-gray-600, body.dark-mode .text-gray-400 { color: #a7afbc !important; }
+    html.dark .bg-amber-50 { background-color: #332b13 !important; }
+    html.dark .border-amber-200 { border-color: #66551a !important; }
+    html.dark .text-amber-900, html.dark .text-amber-700 { color: #f0df87 !important; }
+    html.dark .has-\[\:checked\]\:bg-gray-50:has(:checked) { background-color: #252b32 !important; }
+    .brand-mark { background: linear-gradient(135deg, #d9ff4f, #8ccf00); color: #141800; box-shadow: 0 8px 24px rgba(183, 238, 35, .22); }
+    .brand-logo { width: 150px; height: auto; }
+    .logo-light { display: none; }
+    html.dark .logo-dark { display: none; }
+    html.dark .logo-light { display: block; }
+    .hero-glow { background: radial-gradient(circle at 15% 15%, rgba(200,255,53,.22), transparent 28%), radial-gradient(circle at 85% 70%, rgba(91,70,255,.25), transparent 32%); }
+    .product-card { box-shadow: 0 10px 30px rgba(17, 19, 24, .04); }
+    html.dark .product-card { box-shadow: 0 12px 35px rgba(0,0,0,.24); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    .theme-toggle { background: var(--surface-muted); color: var(--ink); border: 1px solid var(--line); }
+    .focus-ring:focus { outline: 3px solid rgba(200,255,53,.35); outline-offset: 2px; }
+    .editorial-tile { position: relative; min-height: 210px; overflow: hidden; border-radius: 22px; background: var(--surface-muted); border: 1px solid var(--line); }
+    .editorial-tile.md\:row-span-2 { min-height: 435px; }
+    .editorial-tile img { width: 100%; height: 100%; min-height: inherit; object-fit: cover; transition: transform .6s ease, filter .6s ease; }
+    .editorial-tile::after { content: ""; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.72)); }
+    .editorial-tile:hover img { transform: scale(1.06); filter: saturate(1.12); }
+    .editorial-tile span { position: absolute; z-index: 1; bottom: 17px; right: 18px; color: #fff; font-weight: 900; font-size: .9rem; }
+    .benefits-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--line); }
+    .benefits-grid > div { background: var(--surface); padding: 18px; display: flex; flex-direction: column; gap: 3px; }
+    .benefit-icon { color: #8dbf00; font-size: 1.4rem; font-weight: 900; }
+    .benefits-grid strong { font-size: .88rem; }
+    .benefits-grid small { color: var(--muted); font-size: .7rem; }
+    @media (max-width: 640px) {
+      .editorial-tile, .editorial-tile.md\:row-span-2 { min-height: 180px; }
+      .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+      .benefits-grid > div { padding: 13px; }
+    }
   </style>
+  <script>
+    document.documentElement.classList.toggle("dark", localStorage.getItem("new-team-theme") === "dark");
+    window.toggleTheme = function () {
+      const isDark = document.documentElement.classList.toggle("dark");
+      document.body.classList.toggle("dark-mode", isDark);
+      localStorage.setItem("new-team-theme", isDark ? "dark" : "light");
+      document.querySelectorAll("[data-theme-icon]").forEach((el) => { el.textContent = isDark ? "☀️" : "🌙"; });
+    };
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.toggle("dark-mode", document.documentElement.classList.contains("dark"));
+      document.querySelectorAll("[data-theme-icon]").forEach((el) => {
+        el.textContent = document.documentElement.classList.contains("dark") ? "☀️" : "🌙";
+      });
+    });
+  </script>
 </head>
 <body class="bg-gray-50 text-gray-900">
 
   <!-- Navbar -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black text-xl">N</div>
-        <span id="brandTitle" class="font-black text-xl tracking-wide">NEW TEAM</span>
+        <img src="assets/new-team-logo.svg" alt="NEW TEAM" class="brand-logo logo-dark" />
+        <img src="assets/new-team-logo-light.svg" alt="NEW TEAM" class="brand-logo logo-light" />
+        <span id="brandTitle" class="hidden">NEW TEAM</span>
       </div>
 
       <div class="flex items-center gap-3">
-        <a href="admin.html" class="text-xs text-gray-500 hover:text-black transition px-2.5 py-1.5 rounded-lg border border-gray-200">لوحة الإدارة</a>
-        <button onclick="toggleCart(true)" class="relative bg-black text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-800 transition">
+        <button onclick="toggleTheme()" class="theme-toggle w-10 h-10 rounded-xl flex items-center justify-center transition hover:scale-105 focus-ring" aria-label="تبديل الوضع الليلي"><span data-theme-icon>🌙</span></button>
+        <a href="admin.html" class="text-xs theme-muted hover:text-black transition px-2.5 py-1.5 rounded-lg border border-gray-200">لوحة الإدارة</a>
+        <button onclick="toggleCart(true)" class="relative bg-black text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-800 transition shadow-lg">
           <span>السلة</span>
           <span id="cartBadge" class="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded-full">0</span>
         </button>
@@ -32,16 +127,55 @@
   </header>
 
   <!-- Hero Section -->
-  <section class="bg-gradient-to-l from-zinc-900 via-neutral-900 to-black text-white py-12 px-4">
+  <section class="relative overflow-hidden bg-gradient-to-l from-zinc-950 via-neutral-900 to-black text-white py-16 px-4 hero-glow">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
       <div>
-        <span class="bg-amber-400 text-black text-xs font-black px-3 py-1 rounded-full">تشكيلة 2026 الجديدة</span>
-        <h1 class="text-3xl md:text-5xl font-black mt-3 leading-tight">خطوتك تبدأ من هنا.<br/>أحدث الكوتشيات والجزم والسليبرز.</h1>
+        <span class="bg-lime-300 text-black text-xs font-black px-3 py-1 rounded-full">تشكيلة 2026 الجديدة</span>
+        <h1 class="text-3xl md:text-6xl font-black mt-4 leading-tight">خطوتك تبدأ من هنا.<br/>أحدث الكوتشيات والجزم والسليبرز.</h1>
         <p class="text-gray-300 mt-3 text-sm md:text-base max-w-xl">اختر لونك ومقاسك المفضل، واطلب التوصيل لباب بيتك أو احجز قطعتك واستلمها مباشرة من الفرع.</p>
       </div>
       <div class="w-full md:w-80">
-        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="ابحث باسم الموديل..." class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400" />
+        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="ابحث باسم الموديل..." class="w-full px-4 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-lime-300" />
       </div>
+    </div>
+  </section>
+
+  <!-- Brand Editorial Showcase -->
+  <section class="max-w-7xl mx-auto px-4 pt-12">
+    <div class="flex items-end justify-between gap-4 mb-5">
+      <div>
+        <p class="text-xs font-black uppercase tracking-[.25em] text-lime-600">NEW TEAM EDIT</p>
+        <h2 class="text-2xl md:text-3xl font-black mt-1">اختار ستايلك، والباقي علينا</h2>
+      </div>
+      <p class="hidden md:block text-sm theme-muted max-w-xs text-left">تصميمات مختارة لخطوة مختلفة كل يوم.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+      <a href="#productsGrid" class="editorial-tile md:row-span-2">
+        <img src="images/WhatsApp%20Image%202026-11-20%20at%206.02.30%20PM.jpeg" alt="تشكيلة نيو تيم" />
+        <span>الاختيار الأول</span>
+      </a>
+      <a href="#productsGrid" class="editorial-tile">
+        <img src="images/WhatsApp%20Image%202026-11-20%20at%206.03.58%20PM.jpeg" alt="ستايل نيو تيم" />
+        <span>ستايل يومي</span>
+      </a>
+      <a href="#productsGrid" class="editorial-tile">
+        <img src="images/WhatsApp%20Image%202026-11-20%20at%206.03.59%20PM.jpeg" alt="إطلالة نيو تيم" />
+        <span>خليك مختلف</span>
+      </a>
+      <a href="#productsGrid" class="editorial-tile col-span-2">
+        <img src="images/WhatsApp%20Image%202026-11-20%20at%206.03.59%20PM%20(1).jpeg" alt="إصدارات نيو تيم" />
+        <span>إصدارات محدودة</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Brand Benefits -->
+  <section class="max-w-7xl mx-auto px-4 pt-10">
+    <div class="benefits-grid">
+      <div><span class="benefit-icon">✦</span><strong>اختيارات أصلية</strong><small>تفاصيل منتقاة بعناية</small></div>
+      <div><span class="benefit-icon">↗</span><strong>توصيل لباب البيت</strong><small>اطلب بسهولة من أي مكان</small></div>
+      <div><span class="benefit-icon">✓</span><strong>مقاسات وألوان متعددة</strong><small>اختار المناسب ليك</small></div>
+      <div><span class="benefit-icon">◷</span><strong>استلام من الفرع</strong><small>احجز واستلم في الوقت المناسب</small></div>
     </div>
   </section>
 
@@ -84,7 +218,7 @@
 
   <!-- Product Details Modal -->
   <div id="productModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div class="theme-surface rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="p-4 border-b flex items-center justify-between">
         <span id="modalCategory" class="text-xs font-bold bg-gray-100 px-3 py-1 rounded-full"></span>
         <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 font-bold">✕</button>
@@ -242,7 +376,7 @@
         const hasDiscount = p.discountPrice && p.discountPrice < p.price;
 
         const card = document.createElement("div");
-        card.className = "bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition flex flex-col justify-between group";
+        card.className = "product-card bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition flex flex-col justify-between group";
         card.innerHTML = `
           <div>
             <div class="relative aspect-square bg-gray-100 overflow-hidden cursor-pointer" onclick="openProductModal('${p.id}', 0)">
