@@ -17,7 +17,8 @@ export const cloudinaryConfig = {
 // عدّل بيانات البراند والفرع ورقم الواتساب الخاص بك هنا
 export const storeInfo = {
   brandName: "NEW TEAM STORE",
-  branchAddress: "أسيوط - شارع الجمهورية، برج النيل، الدور الأرضي",
+  branchAddress: "سوهاج - طما - شارع الجمهورية - امام كشري السلطان",
   workingHours: "يومياً من 12 ظهراً حتى 11 مساءً",
-  whatsappNumber: "201000000000"
+  phoneNumber: "01028060055",
+  whatsappNumber: "201028060055"
 };
