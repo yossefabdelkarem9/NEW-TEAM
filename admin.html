@@ -61,6 +61,9 @@
     html.dark input, html.dark select, html.dark textarea { background-color: var(--surface-muted); color: var(--ink); border-color: var(--line); }
     .brand-mark { background: linear-gradient(135deg, #d9ff4f, #8ccf00); color: #141800; box-shadow: 0 8px 24px rgba(183, 238, 35, .22); }
     .brand-logo { width: 145px; height: auto; }
+    .logo-light { display: none; }
+    html.dark .logo-dark { display: none; }
+    html.dark .logo-light { display: block; }
     .theme-toggle { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); }
     .admin-card { box-shadow: 0 10px 30px rgba(17, 19, 24, .04); }
     html.dark .admin-card { box-shadow: 0 12px 35px rgba(0,0,0,.24); }
@@ -87,7 +90,10 @@
   <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
     <button onclick="toggleTheme()" class="theme-toggle fixed top-5 left-5 w-10 h-10 rounded-xl flex items-center justify-center" aria-label="تبديل الوضع الليلي"><span data-theme-icon>🌙</span></button>
     <form onsubmit="handleLogin(event)" class="admin-card bg-white p-8 rounded-3xl shadow-lg max-w-sm w-full space-y-4 border border-gray-200">
-      <div class="flex justify-center mb-2"><img src="assets/new-team-logo.svg" alt="NEW TEAM" class="brand-logo" /></div>
+      <div class="flex justify-center mb-2">
+        <img src="assets/new-team-logo.svg" alt="NEW TEAM" class="brand-logo logo-dark" />
+        <img src="assets/new-team-logo-light.svg" alt="NEW TEAM" class="brand-logo logo-light" />
+      </div>
       <h1 class="text-2xl font-black text-center">دخول الإدارة</h1>
       <p class="text-xs text-gray-500 text-center">أدخل حساب الأدمن المسجل في Firebase</p>
       <input type="email" id="adminEmail" required placeholder="البريد الإلكتروني" class="w-full border rounded-xl px-4 py-3 text-sm" />
