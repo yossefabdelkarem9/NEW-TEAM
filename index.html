@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المتجر الرسمي | كوتشيات وجزم وسليبرز</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Cairo', sans-serif; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black text-xl">N</div>
+        <span id="brandTitle" class="font-black text-xl tracking-wide">NEW TEAM</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="admin.html" class="text-xs text-gray-500 hover:text-black transition px-2.5 py-1.5 rounded-lg border border-gray-200">لوحة الإدارة</a>
+        <button onclick="toggleCart(true)" class="relative bg-black text-white px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-gray-800 transition">
+          <span>السلة</span>
+          <span id="cartBadge" class="bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded-full">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-l from-zinc-900 via-neutral-900 to-black text-white py-12 px-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div>
+        <span class="bg-amber-400 text-black text-xs font-black px-3 py-1 rounded-full">تشكيلة 2026 الجديدة</span>
+        <h1 class="text-3xl md:text-5xl font-black mt-3 leading-tight">خطوتك تبدأ من هنا.<br/>أحدث الكوتشيات والجزم والسليبرز.</h1>
+        <p class="text-gray-300 mt-3 text-sm md:text-base max-w-xl">اختر لونك ومقاسك المفضل، واطلب التوصيل لباب بيتك أو احجز قطعتك واستلمها مباشرة من الفرع.</p>
+      </div>
+      <div class="w-full md:w-80">
+        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="ابحث باسم الموديل..." class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters Bar -->
+  <section class="max-w-7xl mx-auto px-4 mt-8">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryTabs">
+        <button onclick="setCategory('الكل')" class="cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-black text-white transition">الكل</button>
+        <button onclick="setCategory('كوتشيات')" class="cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-white border border-gray-200 hover:border-black transition">كوتشيات</button>
+        <button onclick="setCategory('جزم')" class="cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-white border border-gray-200 hover:border-black transition">جزم كلاسيك وكاجوال</button>
+        <button onclick="setCategory('سليبرز')" class="cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-white border border-gray-200 hover:border-black transition">سليبرز</button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <label class="text-sm font-bold text-gray-600">فلتر المقاس:</label>
+        <select id="sizeFilter" onchange="renderProducts()" class="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold focus:outline-none">
+          <option value="all">كل المقاسات</option>
+          <option value="38">38</option>
+          <option value="39">39</option>
+          <option value="40">40</option>
+          <option value="41">41</option>
+          <option value="42">42</option>
+          <option value="43">43</option>
+          <option value="44">44</option>
+          <option value="45">45</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Grid -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div id="loader" class="text-center py-20 text-gray-500 font-bold">جاري تحميل المنتجات...</div>
+    <div id="emptyState" class="hidden text-center py-20 bg-white rounded-2xl border border-gray-200">
+      <p class="text-lg font-bold text-gray-700">لا توجد منتجات حالياً</p>
+      <p class="text-sm text-gray-500 mt-1">أضف منتجاتك الأولى من <a href="admin.html" class="underline text-black font-bold">لوحة الأدمن</a>.</p>
+    </div>
+    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </main>
+
+  <!-- Product Details Modal -->
+  <div id="productModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="p-4 border-b flex items-center justify-between">
+        <span id="modalCategory" class="text-xs font-bold bg-gray-100 px-3 py-1 rounded-full"></span>
+        <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 font-bold">✕</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+        <div>
+          <div class="aspect-square rounded-2xl overflow-hidden bg-gray-100 border">
+            <img id="modalMainImg" src="" alt="" class="w-full h-full object-cover" />
+          </div>
+          <div id="modalThumbnails" class="flex gap-2 mt-3 overflow-x-auto"></div>
+        </div>
+
+        <div class="flex flex-col justify-between">
+          <div>
+            <h2 id="modalTitle" class="text-2xl font-black"></h2>
+            <div id="modalPrice" class="mt-2 flex items-center gap-3"></div>
+            <p id="modalDesc" class="text-sm text-gray-600 mt-3 leading-relaxed"></p>
+
+            <div class="mt-5">
+              <p class="text-sm font-bold mb-2">اختر اللون: <span id="selectedColorName" class="text-amber-600"></span></p>
+              <div id="modalColors" class="flex flex-wrap gap-2.5"></div>
+            </div>
+
+            <div class="mt-5">
+              <p class="text-sm font-bold mb-2">اختر المقاس:</p>
+              <div id="modalSizes" class="grid grid-cols-4 gap-2"></div>
+            </div>
+          </div>
+
+          <button id="addToCartBtn" onclick="addSelectedToCart()" class="mt-6 w-full bg-black text-white py-3.5 rounded-xl font-bold hover:bg-gray-800 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+            أضف إلى السلة
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart & Checkout Drawer -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex justify-end">
+    <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+      <div class="p-4 border-b flex items-center justify-between">
+        <h3 class="font-black text-lg">سلة المشتريات والطلب</h3>
+        <button onclick="toggleCart(false)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 font-bold">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div id="cartItemsContainer" class="space-y-3"></div>
+
+        <form id="checkoutForm" onsubmit="submitOrder(event)" class="hidden border-t pt-4 space-y-3">
+          <h4 class="font-bold text-sm text-gray-800">بيانات الاستلام</h4>
+          
+          <input type="text" id="custName" required placeholder="الاسم بالكامل" class="w-full border rounded-xl px-3.5 py-2.5 text-sm" />
+          <input type="tel" id="custPhone" required placeholder="رقم الموبايل / واتساب" class="w-full border rounded-xl px-3.5 py-2.5 text-sm" />
+
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer border rounded-xl p-3 flex items-center gap-2 text-xs font-bold has-[:checked]:border-black has-[:checked]:bg-gray-50">
+              <input type="radio" name="deliveryMethod" value="delivery" checked onchange="toggleAddressField()" />
+              <span>توصيل للمنزل</span>
+            </label>
+            <label class="cursor-pointer border rounded-xl p-3 flex items-center gap-2 text-xs font-bold has-[:checked]:border-black has-[:checked]:bg-gray-50">
+              <input type="radio" name="deliveryMethod" value="pickup" onchange="toggleAddressField()" />
+              <span>استلام من المحل</span>
+            </label>
+          </div>
+
+          <div id="addressBox">
+            <textarea id="custAddress" rows="2" placeholder="العنوان بالتفصيل (المحافظة - المنطقة - الشارع)" class="w-full border rounded-xl px-3.5 py-2 text-sm"></textarea>
+          </div>
+
+          <div id="pickupInfoBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 space-y-1">
+            <p class="font-bold">عنوان الفرع للاستلام:</p>
+            <p id="branchAddressText"></p>
+            <p id="branchHoursText" class="text-amber-700"></p>
+          </div>
+
+          <div class="bg-gray-100 rounded-xl p-3 flex justify-between items-center font-black">
+            <span>الإجمالي:</span>
+            <span id="cartTotalText" class="text-lg">0 ج.م</span>
+          </div>
+
+          <button type="submit" id="submitOrderBtn" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold hover:bg-emerald-700 transition">
+            تأكيد الطلب الآن
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig, storeInfo } from "./firebase-config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("brandTitle").textContent = storeInfo.brandName;
+    document.getElementById("branchAddressText").textContent = storeInfo.branchAddress;
+    document.getElementById("branchHoursText").textContent = storeInfo.workingHours;
+
+    let allProducts = [];
+    let currentCategory = "الكل";
+    let cart = JSON.parse(localStorage.getItem("stepx_cart") || "[]");
+    let modalState = { product: null, variantIdx: 0, selectedSize: null };
+
+    async function loadProducts() {
+      try {
+        const snap = await getDocs(collection(db, "products"));
+        allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        document.getElementById("loader").classList.add("hidden");
+        renderProducts();
+        updateCartUI();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("loader").textContent = "حدث خطأ في الاتصال بقاعدة البيانات. راجع Console.";
+      }
+    }
+
+    window.setCategory = (cat) => {
+      currentCategory = cat;
+      document.querySelectorAll(".cat-btn").forEach(btn => {
+        const isTarget = btn.textContent.includes(cat) || (cat === "الكل" && btn.textContent === "الكل");
+        btn.className = isTarget
+          ? "cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-black text-white transition"
+          : "cat-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-white border border-gray-200 hover:border-black transition";
+      });
+      renderProducts();
+    };
+
+    window.renderProducts = () => {
+      const grid = document.getElementById("productsGrid");
+      const emptyState = document.getElementById("emptyState");
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const sizeFilter = document.getElementById("sizeFilter").value;
+
+      const filtered = allProducts.filter(p => {
+        const matchCat = currentCategory === "الكل" || p.category === currentCategory;
+        const matchSearch = !search || p.name.toLowerCase().includes(search);
+        const matchSize = sizeFilter === "all" || (p.variants || []).some(v => (v.sizes?.[sizeFilter] || 0) > 0);
+        return matchCat && matchSearch && matchSize;
+      });
+
+      grid.innerHTML = "";
+      if (filtered.length === 0) {
+        emptyState.classList.remove("hidden");
+        return;
+      }
+      emptyState.classList.add("hidden");
+
+      filtered.forEach(p => {
+        const variants = p.variants || [];
+        const firstVar = variants[0] || { images: [], colorHex: "#000", colorName: "" };
+        const imgUrl = firstVar.images?.[0] || "https://placehold.co/600x600?text=No+Image";
+        const finalPrice = p.discountPrice && p.discountPrice < p.price ? p.discountPrice : p.price;
+        const hasDiscount = p.discountPrice && p.discountPrice < p.price;
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition flex flex-col justify-between group";
+        card.innerHTML = `
+          <div>
+            <div class="relative aspect-square bg-gray-100 overflow-hidden cursor-pointer" onclick="openProductModal('${p.id}', 0)">
+              <img id="card-img-${p.id}" src="${imgUrl}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+              <span class="absolute top-3 right-3 bg-white/90 backdrop-blur text-xs font-bold px-2.5 py-1 rounded-lg">${p.category}</span>
+              ${hasDiscount ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">خصم</span>` : ""}
+            </div>
+            <div class="p-4">
+              <h3 onclick="openProductModal('${p.id}', 0)" class="font-bold text-lg cursor-pointer hover:underline">${p.name}</h3>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="font-black text-lg text-black">${finalPrice} ج.م</span>
+                ${hasDiscount ? `<span class="text-xs text-gray-400 line-through">${p.price} ج.م</span>` : ""}
+              </div>
+
+              <div class="flex items-center gap-2 mt-3">
+                ${variants.map((v, idx) => `
+                  <button title="${v.colorName}" onclick="previewCardColor('${p.id}',${idx})"
+                    style="background-color: ${v.colorHex || '#111'}"
+                    class="w-6 h-6 rounded-full border-2 border-white ring-1 ring-gray-300 hover:scale-110 transition">
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+          <div class="px-4 pb-4">
+            <button onclick="openProductModal('${p.id}', 0)" class="w-full bg-gray-100 hover:bg-black hover:text-white text-black font-bold py-2.5 rounded-xl text-sm transition">
+              اختر المقاس واللون
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    };
+
+    window.previewCardColor = (productId, variantIdx) => {
+      const product = allProducts.find(p => p.id === productId);
+      const img = product?.variants?.[variantIdx]?.images?.[0];
+      if (img) document.getElementById(`card-img-${productId}`).src = img;
+    };
+
+    window.openProductModal = (productId, variantIdx = 0) => {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+      modalState = { product, variantIdx, selectedSize: null };
+
+      document.getElementById("modalCategory").textContent = product.category;
+      document.getElementById("modalTitle").textContent = product.name;
+      document.getElementById("modalDesc").textContent = product.description || "";
+
+      const finalPrice = product.discountPrice && product.discountPrice < product.price ? product.discountPrice : product.price;
+      const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+      document.getElementById("modalPrice").innerHTML = `
+        <span class="text-2xl font-black">${finalPrice} ج.م</span>
+        ${hasDiscount ? `<span class="text-sm text-gray-400 line-through">${product.price} ج.م</span>` : ""}
+      `;
+
+      renderModalVariant();
+      document.getElementById("productModal").classList.remove("hidden");
+    };
+
+    function renderModalVariant() {
+      const { product, variantIdx } = modalState;
+      const variants = product.variants || [];
+      const currentVar = variants[variantIdx] || { images: [], sizes: {}, colorName: "" };
+
+      document.getElementById("selectedColorName").textContent = currentVar.colorName;
+
+      const imgs = currentVar.images?.length ? currentVar.images : ["https://placehold.co/600x600?text=No+Image"];
+      document.getElementById("modalMainImg").src = imgs[0];
+      document.getElementById("modalThumbnails").innerHTML = imgs.map(src => `
+        <img src="${src}" onclick="document.getElementById('modalMainImg').src='${src}'"
+          class="w-16 h-16 rounded-lg object-cover border cursor-pointer hover:border-black" />
+      `).join("");
+
+      document.getElementById("modalColors").innerHTML = variants.map((v, idx) => `
+        <button onclick="switchModalColor(${idx})"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold ${idx === variantIdx ? 'border-black bg-gray-100' : 'border-gray-200'}">
+          <span class="w-4 h-4 rounded-full border" style="background:${v.colorHex}"></span>
+          <span>${v.colorName}</span>
+        </button>
+      `).join("");
+
+      const sizesObj = currentVar.sizes || {};
+      const sizeKeys = Object.keys(sizesObj).sort((a, b) => Number(a) - Number(b));
+      document.getElementById("modalSizes").innerHTML = sizeKeys.map(sz => {
+        const qty = Number(sizesObj[sz] || 0);
+        const outOfStock = qty <= 0;
+        const isSelected = modalState.selectedSize === sz;
+        return `
+          <button ${outOfStock ? "disabled" : ""} onclick="selectModalSize('${sz}')"
+            class="py-2 rounded-xl border text-sm font-bold transition
+            ${outOfStock ? 'bg-gray-100 text-gray-400 line-through cursor-not-allowed' : isSelected ? 'bg-black text-white border-black' : 'hover:border-black'}">
+            ${sz}
+          </button>
+        `;
+      }).join("");
+
+      const addBtn = document.getElementById("addToCartBtn");
+      addBtn.disabled = !modalState.selectedSize;
+      addBtn.textContent = modalState.selectedSize ? `أضف مقاس ${modalState.selectedSize} للسلة` : "اختر المقاس أولاً";
+    }
+
+    window.switchModalColor = (idx) => {
+      modalState.variantIdx = idx;
+      modalState.selectedSize = null;
+      renderModalVariant();
+    };
+
+    window.selectModalSize = (sz) => {
+      modalState.selectedSize = sz;
+      renderModalVariant();
+    };
+
+    window.closeProductModal = () => {
+      document.getElementById("productModal").classList.add("hidden");
+    };
+
+    window.addSelectedToCart = () => {
+      const { product, variantIdx, selectedSize } = modalState;
+      if (!product || !selectedSize) return;
+      const variant = product.variants[variantIdx];
+      const maxStock = Number(variant.sizes[selectedSize] || 0);
+      const price = product.discountPrice && product.discountPrice < product.price ? product.discountPrice : product.price;
+      const key = `${product.id}_${variant.colorName}_${selectedSize}`;
+
+      const existing = cart.find(i => i.key === key);
+      if (existing) {
+        if (existing.qty < maxStock) existing.qty += 1;
+        else return alert("وصلت للحد الأقصى المتاح في المخزون لهذا المقاس!");
+      } else {
+        cart.push({
+          key,
+          productId: product.id,
+          variantIdx,
+          name: product.name,
+          color: variant.colorName,
+          size: selectedSize,
+          image: variant.images?.[0] || "",
+          price: Number(price),
+          qty: 1,
+          maxStock
+        });
+      }
+
+      saveCart();
+      closeProductModal();
+      toggleCart(true);
+    };
+
+    function saveCart() {
+      localStorage.setItem("stepx_cart", JSON.stringify(cart));
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const count = cart.reduce((acc, i) => acc + i.qty, 0);
+      document.getElementById("cartBadge").textContent = count;
+
+      const container = document.getElementById("cartItemsContainer");
+      const form = document.getElementById("checkoutForm");
+
+      if (cart.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-400 py-10 text-sm">السلة فارغة حالياً</p>`;
+        form.classList.add("hidden");
+        return;
+      }
+
+      form.classList.remove("hidden");
+      let total = 0;
+      container.innerHTML = cart.map((item, idx) => {
+        total += item.price * item.qty;
+        return `
+          <div class="flex gap-3 bg-gray-50 p-3 rounded-xl border">
+            <img src="${item.image}" class="w-16 h-16 rounded-lg object-cover bg-white" />
+            <div class="flex-1">
+              <h5 class="font-bold text-sm">${item.name}</h5>
+              <p class="text-xs text-gray-500">اللون: ${item.color} | المقاس: ${item.size}</p>
+              <p class="font-black text-sm mt-1">${item.price * item.qty} ج.م</p>
+            </div>
+            <div class="flex flex-col items-end justify-between">
+              <button onclick="removeCartItem(${idx})" class="text-xs text-red-500 font-bold">حذف</button>
+              <div class="flex items-center gap-2 bg-white border rounded-lg px-2 py-0.5 text-xs font-bold">
+                <button onclick="changeCartQty(${idx}, -1)">-</button>
+                <span>${item.qty}</span>
+                <button onclick="changeCartQty(${idx}, 1)">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("cartTotalText").textContent = `${total} ج.م`;
+    }
+
+    window.changeCartQty = (idx, delta) => {
+      const item = cart[idx];
+      const next = item.qty + delta;
+      if (next <= 0) cart.splice(idx, 1);
+      else if (next <= item.maxStock) item.qty = next;
+      else alert("لا توجد كمية إضافية في المخزون");
+      saveCart();
+    };
+
+    window.removeCartItem = (idx) => {
+      cart.splice(idx, 1);
+      saveCart();
+    };
+
+    window.toggleCart = (open) => {
+      document.getElementById("cartDrawer").classList.toggle("hidden", !open);
+    };
+
+    window.toggleAddressField = () => {
+      const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      document.getElementById("addressBox").classList.toggle("hidden", method === "pickup");
+      document.getElementById("pickupInfoBox").classList.toggle("hidden", method !== "pickup");
+    };
+
+    window.submitOrder = async (e) => {
+      e.preventDefault();
+      if (cart.length === 0) return;
+
+      const btn = document.getElementById("submitOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "جاري تأكيد الطلب...";
+
+      const customerName = document.getElementById("custName").value.trim();
+      const phone = document.getElementById("custPhone").value.trim();
+      const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      const address = deliveryMethod === "delivery" ? document.getElementById("custAddress").value.trim() : storeInfo.branchAddress;
+
+      if (deliveryMethod === "delivery" && !address) {
+        alert("يرجى كتابة عنوان التوصيل");
+        btn.disabled = false;
+        btn.textContent = "تأكيد الطلب الآن";
+        return;
+      }
+
+      try {
+        await runTransaction(db, async (transaction) => {
+          const productMap = new Map();
+          for (const item of cart) {
+            if (!productMap.has(item.productId)) {
+              const pRef = doc(db, "products", item.productId);
+              const pSnap = await transaction.get(pRef);
+              if (!pSnap.exists()) throw new Error(`المنتج ${item.name} غير موجود`);
+              productMap.set(item.productId, { pRef, data: pSnap.data() });
+            }
+          }
+
+          for (const item of cart) {
+            const entry = productMap.get(item.productId);
+            const variants = entry.data.variants;
+            const vIndex = variants.findIndex(v => v.colorName === item.color);
+            if (vIndex === -1) throw new Error(`اللون ${item.color} غير متاح`);
+            const currentStock = Number(variants[vIndex].sizes?.[item.size] || 0);
+            if (currentStock < item.qty) {
+              throw new Error(`عذراً، مقاس ${item.size} من ${item.name} (${item.color}) نفد للتو!`);
+            }
+            variants[vIndex].sizes[item.size] = currentStock - item.qty;
+          }
+
+          for (const { pRef, data } of productMap.values()) {
+            transaction.update(pRef, { variants: data.variants });
+          }
+
+          const orderRef = doc(collection(db, "orders"));
+          const totalAmount = cart.reduce((s, i) => s + i.price * i.qty, 0);
+          transaction.set(orderRef, {
+            customerName,
+            phone,
+            deliveryMethod,
+            address,
+            items: cart.map(({ productId, name, color, size, qty, price }) => ({ productId, name, color, size, qty, price })),
+            totalAmount,
+            status: "pending",
+            createdAt: serverTimestamp()
+          });
+        });
+
+        cart = [];
+        saveCart();
+        toggleCart(false);
+        alert("تم تسجيل طلبك بنجاح! سنتواصل معك لتأكيد الاستلام.");
+        loadProducts();
+      } catch (err) {
+        alert(err.message || "حدث خطأ أثناء تنفيذ الطلب");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "تأكيد الطلب الآن";
+      }
+    };
+
+    loadProducts();
+  </script>
+</body>
+</html>

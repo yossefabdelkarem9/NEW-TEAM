@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة تحكم الأدمن | إدارة المتجر</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <!-- Login View -->
+  <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+    <form onsubmit="handleLogin(event)" class="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full space-y-4">
+      <h1 class="text-2xl font-black text-center">دخول الإدارة</h1>
+      <p class="text-xs text-gray-500 text-center">أدخل حساب الأدمن المسجل في Firebase</p>
+      <input type="email" id="adminEmail" required placeholder="البريد الإلكتروني" class="w-full border rounded-xl px-4 py-3 text-sm" />
+      <input type="password" id="adminPass" required placeholder="كلمة المرور" class="w-full border rounded-xl px-4 py-3 text-sm" />
+      <button type="submit" class="w-full bg-black text-white py-3 rounded-xl font-bold hover:bg-gray-800">تسجيل الدخول</button>
+    </form>
+  </div>
+
+  <!-- Dashboard View -->
+  <div id="dashboardView" class="hidden min-h-screen">
+    <header class="bg-black text-white px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <span class="font-black text-lg">لوحة إدارة المتجر</span>
+        <a href="index.html" target="_blank" class="text-xs bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20">معاينة المتجر ↗</a>
+      </div>
+      <button onclick="handleLogout()" class="text-xs bg-red-600 px-3 py-1.5 rounded-lg font-bold">تسجيل خروج</button>
+    </header>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border">
+          <p class="text-xs text-gray-500">إجمالي المنتجات</p>
+          <p id="statProducts" class="text-2xl font-black mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border">
+          <p class="text-xs text-gray-500">إجمالي الطلبات</p>
+          <p id="statOrders" class="text-2xl font-black mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border">
+          <p class="text-xs text-gray-500">طلبات قيد الانتظار</p>
+          <p id="statPending" class="text-2xl font-black text-amber-600 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border">
+          <p class="text-xs text-gray-500">إجمالي المبيعات</p>
+          <p id="statRevenue" class="text-2xl font-black text-emerald-600 mt-1">0 ج.م</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="flex gap-2">
+        <button onclick="switchTab('products')" id="tabBtnProducts" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-black text-white">إدارة المنتجات والمخزون</button>
+        <button onclick="switchTab('orders')" id="tabBtnOrders" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-white border">الطلبات الواردة</button>
+      </div>
+
+      <!-- TAB 1: PRODUCTS -->
+      <div id="tabProducts" class="space-y-6">
+        <div class="bg-white p-6 rounded-2xl border space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 id="formHeading" class="font-black text-lg">إضافة منتج جديد</h2>
+            <button type="button" onclick="resetProductForm()" class="text-xs text-gray-500 underline">إلغاء / تفريغ الحقول</button>
+          </div>
+
+          <form id="productForm" onsubmit="saveProduct(event)" class="space-y-4">
+            <input type="hidden" id="editProductId" />
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <input type="text" id="pName" required placeholder="اسم المنتج (مثال: Air Zoom)" class="border rounded-xl px-3.5 py-2.5 text-sm" />
+              <select id="pCategory" class="border rounded-xl px-3.5 py-2.5 text-sm font-bold">
+                <option value="كوتشيات">كوتشيات</option>
+                <option value="جزم">جزم</option>
+                <option value="سليبرز">سليبرز</option>
+              </select>
+              <input type="number" id="pPrice" required placeholder="السعر الأساسي (ج.م)" class="border rounded-xl px-3.5 py-2.5 text-sm" />
+              <input type="number" id="pDiscount" placeholder="السعر بعد الخصم (اختياري)" class="border rounded-xl px-3.5 py-2.5 text-sm" />
+            </div>
+
+            <textarea id="pDesc" rows="2" placeholder="وصف المنتج والخامة..." class="w-full border rounded-xl px-3.5 py-2 text-sm"></textarea>
+
+            <div class="border-t pt-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm">الألوان والصور والمقاسات</h3>
+                <button type="button" onclick="addVariantBlock()" class="bg-amber-400 text-black text-xs font-black px-3 py-1.5 rounded-lg hover:bg-amber-500">
+                  + إضافة لون جديد
+                </button>
+              </div>
+              <div id="variantsContainer" class="space-y-4"></div>
+            </div>
+
+            <button type="submit" class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800">
+              حفظ المنتج في المتجر
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border">
+          <h2 class="font-black text-lg mb-4">المنتجات الحالية</h2>
+          <div id="adminProductsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ORDERS -->
+      <div id="tabOrders" class="hidden bg-white p-6 rounded-2xl border space-y-4">
+        <h2 class="font-black text-lg">الطلبات الواردة</h2>
+        <div id="adminOrdersList" class="space-y-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { firebaseConfig, cloudinaryConfig } from "./firebase-config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let productsCache = [];
+    let variantBlocks = [];
+
+    onAuthStateChanged(auth, (user) => {
+      document.getElementById("loginView").classList.toggle("hidden", !!user);
+      document.getElementById("dashboardView").classList.toggle("hidden", !user);
+      if (user) initRealtimeListeners();
+    });
+
+    window.handleLogin = async (e) => {
+      e.preventDefault();
+      try {
+        await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPass").value);
+      } catch (err) {
+        alert("بيانات الدخول غير صحيحة: " + err.message);
+      }
+    };
+
+    window.handleLogout = () => signOut(auth);
+
+    window.switchTab = (tab) => {
+      document.getElementById("tabProducts").classList.toggle("hidden", tab !== "products");
+      document.getElementById("tabOrders").classList.toggle("hidden", tab !== "orders");
+      document.getElementById("tabBtnProducts").className = tab === "products" ? "px-5 py-2.5 rounded-xl font-bold text-sm bg-black text-white" : "px-5 py-2.5 rounded-xl font-bold text-sm bg-white border";
+      document.getElementById("tabBtnOrders").className = tab === "orders" ? "px-5 py-2.5 rounded-xl font-bold text-sm bg-black text-white" : "px-5 py-2.5 rounded-xl font-bold text-sm bg-white border";
+    };
+
+    window.addVariantBlock = (data = null) => {
+      const defaultSizes = { "38": 0, "39": 0, "40": 0, "41": 0, "42": 0, "43": 0, "44": 0, "45": 0 };
+      variantBlocks.push({
+        colorName: data?.colorName || "",
+        colorHex: data?.colorHex || "#000000",
+        images: data?.images ? [...data.images] : [],
+        sizes: data?.sizes ? { ...defaultSizes, ...data.sizes } : defaultSizes
+      });
+      renderVariantBlocks();
+    };
+
+    window.removeVariantBlock = (idx) => {
+      variantBlocks.splice(idx, 1);
+      renderVariantBlocks();
+    };
+
+    window.uploadVariantImages = (idx) => {
+      const widget = cloudinary.createUploadWidget({
+        cloudName: cloudinaryConfig.cloudName,
+        uploadPreset: cloudinaryConfig.uploadPreset,
+        multiple: true,
+        folder: "footwear_store"
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          variantBlocks[idx].images.push(result.info.secure_url);
+          renderVariantBlocks();
+        }
+      });
+      widget.open();
+    };
+
+    window.removeVariantImage = (vIdx, imgIdx) => {
+      variantBlocks[vIdx].images.splice(imgIdx, 1);
+      renderVariantBlocks();
+    };
+
+    function renderVariantBlocks() {
+      const container = document.getElementById("variantsContainer");
+      container.innerHTML = variantBlocks.map((v, idx) => `
+        <div class="p-4 rounded-xl border bg-gray-50 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <input type="color" value="${v.colorHex}" onchange="variantBlocks[${idx}].colorHex = this.value" class="w-10 h-10 rounded cursor-pointer border" />
+              <input type="text" value="${v.colorName}" oninput="variantBlocks[${idx}].colorName = this.value" placeholder="اسم اللون (مثال: أبيض)" required class="border rounded-lg px-3 py-2 text-sm bg-white" />
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="uploadVariantImages(${idx})" class="bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-700">
+                رفع صور اللون
+              </button>
+              ${variantBlocks.length > 1 ? `<button type="button" onclick="removeVariantBlock(${idx})" class="text-xs text-red-600 font-bold px-2">حذف اللون</button>` : ""}
+            </div>
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            ${v.images.map((url, imgIdx) => `
+              <div class="relative w-16 h-16">
+                <img src="${url}" class="w-full h-full object-cover rounded-lg border bg-white" />
+                <button type="button" onclick="removeVariantImage(${idx}, ${imgIdx})" class="absolute -top-1 -right-1 bg-red-600 text-white w-4 h-4 rounded-full text-[10px]">✕</button>
+              </div>
+            `).join("")}
+          </div>
+
+          <div>
+            <p class="text-xs font-bold text-gray-600 mb-1.5">الكمية المتاحة لكل مقاس:</p>
+            <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              ${Object.keys(v.sizes).map(sz => `
+                <div class="bg-white border rounded-lg p-1.5 text-center">
+                  <label class="block text-[11px] font-bold text-gray-500">مقاس ${sz}</label>
+                  <input type="number" min="0" value="${v.sizes[sz]}"
+                    onchange="variantBlocks[${idx}].sizes['${sz}'] = Number(this.value)"
+                    class="w-full text-center font-black text-sm focus:outline-none" />
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.variantBlocks = variantBlocks;
+
+    window.resetProductForm = () => {
+      document.getElementById("productForm").reset();
+      document.getElementById("editProductId").value = "";
+      document.getElementById("formHeading").textContent = "إضافة منتج جديد";
+      variantBlocks.length = 0;
+      addVariantBlock();
+    };
+
+    window.saveProduct = async (e) => {
+      e.preventDefault();
+      const editId = document.getElementById("editProductId").value;
+      const payload = {
+        name: document.getElementById("pName").value.trim(),
+        category: document.getElementById("pCategory").value,
+        price: Number(document.getElementById("pPrice").value),
+        discountPrice: document.getElementById("pDiscount").value ? Number(document.getElementById("pDiscount").value) : null,
+        description: document.getElementById("pDesc").value.trim(),
+        variants: variantBlocks
+      };
+
+      try {
+        if (editId) {
+          await updateDoc(doc(db, "products", editId), payload);
+          alert("تم تحديث المنتج بنجاح!");
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, "products"), payload);
+          alert("تم إضافة المنتج للمتجر!");
+        }
+        resetProductForm();
+      } catch (err) {
+        alert("خطأ أثناء الحفظ: " + err.message);
+      }
+    };
+
+    window.editProduct = (id) => {
+      const p = productsCache.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById("editProductId").value = p.id;
+      document.getElementById("formHeading").textContent = `تعديل: ${p.name}`;
+      document.getElementById("pName").value = p.name;
+      document.getElementById("pCategory").value = p.category;
+      document.getElementById("pPrice").value = p.price;
+      document.getElementById("pDiscount").value = p.discountPrice || "";
+      document.getElementById("pDesc").value = p.description || "";
+
+      variantBlocks.length = 0;
+      (p.variants || []).forEach(v => addVariantBlock(v));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    window.deleteProduct = async (id) => {
+      if (!confirm("هل أنت متأكد من حذف هذا المنتج نهائياً؟")) return;
+      await deleteDoc(doc(db, "products", id));
+    };
+
+    window.updateOrderStatus = async (orderId, status) => {
+      await updateDoc(doc(db, "orders", orderId), { status });
+    };
+
+    function initRealtimeListeners() {
+      if (variantBlocks.length === 0) addVariantBlock();
+
+      onSnapshot(collection(db, "products"), (snap) => {
+        productsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        document.getElementById("statProducts").textContent = productsCache.length;
+
+        const list = document.getElementById("adminProductsList");
+        list.innerHTML = productsCache.map(p => {
+          const totalStock = (p.variants || []).reduce((sum, v) => sum + Object.values(v.sizes || {}).reduce((a, b) => a + Number(b), 0), 0);
+          const thumb = p.variants?.[0]?.images?.[0] || "https://placehold.co/200x200?text=No+Img";
+          return `
+            <div class="border rounded-xl p-3 flex gap-3 items-center justify-between">
+              <div class="flex gap-3 items-center">
+                <img src="${thumb}" class="w-16 h-16 rounded-lg object-cover bg-gray-100" />
+                <div>
+                  <span class="text-[11px] bg-gray-100 px-2 py-0.5 rounded font-bold">${p.category}</span>
+                  <h4 class="font-bold text-sm mt-0.5">${p.name}</h4>
+                  <p class="text-xs text-gray-500">المخزون الكلي: <strong class="text-black">${totalStock} قطعة</strong></p>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <button onclick="editProduct('${p.id}')" class="text-xs bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-lg">تعديل</button>
+                <button onclick="deleteProduct('${p.id}')" class="text-xs bg-red-100 text-red-700 font-bold px-3 py-1 rounded-lg">حذف</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      });
+
+      const qOrders = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+      onSnapshot(qOrders, (snap) => {
+        const orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        document.getElementById("statOrders").textContent = orders.length;
+        document.getElementById("statPending").textContent = orders.filter(o => o.status === "pending").length;
+        const revenue = orders.filter(o => o.status !== "cancelled").reduce((s, o) => s + Number(o.totalAmount || 0), 0);
+        document.getElementById("statRevenue").textContent = `${revenue} ج.م`;
+
+        const container = document.getElementById("adminOrdersList");
+        container.innerHTML = orders.map(o => `
+          <div class="border rounded-xl p-4 flex flex-col md:flex-row justify-between gap-4 bg-gray-50">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="font-black">${o.customerName}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${o.deliveryMethod === 'pickup' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                  ${o.deliveryMethod === 'pickup' ? 'استلام من المحل' : 'توصيل للمنزل'}
+                </span>
+              </div>
+              <p class="text-xs text-gray-600">الهاتف: <a href="https://wa.me/2${o.phone}" target="_blank" class="underline font-bold text-emerald-700">${o.phone} (واتساب)</a></p>
+              <p class="text-xs text-gray-600">العنوان: ${o.address}</p>
+              <div class="mt-2 space-y-1">
+                ${(o.items || []).map(i => `<p class="text-xs font-bold">• ${i.name} (${i.color} - مقاس ${i.size}) × ${i.qty} = ${i.price * i.qty} ج.م</p>`).join("")}
+              </div>
+            </div>
+            <div class="flex flex-col justify-between items-end">
+              <span class="font-black text-lg">${o.totalAmount} ج.م</span>
+              <select onchange="updateOrderStatus('${o.id}', this.value)" class="border rounded-xl px-3 py-2 text-xs font-bold bg-white">
+                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>قيد الانتظار</option>
+                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>تم التأكيد</option>
+                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>تم التسليم</option>
+                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
+              </select>
+            </div>
+          </div>
+        `).join("");
+      });
+    }
+  </script>
+</body>
+</html>
